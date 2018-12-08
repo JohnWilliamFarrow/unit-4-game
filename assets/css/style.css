@@ -1,0 +1,93 @@
+/* Set Title */ 
+#title {
+    font-family: 'Determination Sans', Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    color: white;
+    font-size: 300%;
+    margin-bottom: 0;
+    border-radius: 0;
+    text-align: center;
+    background-color: black;
+  }
+
+p{
+    font-family: 'Determination Sans', Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+}
+
+h1 {
+    font-family: 'Determination Sans', Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 200%;
+    text-align: center;
+}
+  
+#luke {
+    background-image: url("../images/lukeBase.png");
+    height: 75px;
+    width: 75px;
+    margin: 10 10 10 10;
+    padding: 0;
+}
+
+#vader {
+    background-image: url("../images/vaderBase.png");
+    height: 75px;
+    width: 75px;
+    margin: 10 10 10 10;
+    padding: 0;
+}
+
+#obiWan {
+    background-image: url("../images/obiBase.png");
+    height: 75px;
+    width: 75px;
+    margin: 10 10 10 10;
+    padding: 0;
+}
+
+#han {
+    background-image: url("../images/hanBase.png");
+    height: 75px;
+    width: 75px;
+    margin: 10 10 10 10;
+    padding: 0;
+}
+  /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+  .row.content {height: 450px}
+  
+  /* Set gray background color and 100% height */
+  .sidenav {
+    padding-top: 20px;
+    background-color: #f1f1f1;
+    height: 100%;
+  }
+  
+  /* Set black background color, white text and some padding */
+  footer {
+    background-color: #555;
+    color: white;
+    padding: 15px;
+  }
+  
+  /* On small screens, set height to 'auto' for sidenav and grid */
+@media screen and (max-width: 767px) {
+    .sidenav {
+      height: auto;
+      padding: 15px;
+    }
+    .row.content {height:auto;} 
+}
+
+@font-face {
+    font-family: "Determination Sans";
+    src: url("DTM-Sans.otf");
+}
+
+@font-face {
+    font-family: "Determination Mono";
+    src: url("DTM-Mono.otf");
+}
