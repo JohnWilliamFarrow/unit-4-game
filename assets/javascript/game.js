@@ -5,18 +5,20 @@ $(document).ready(function () {
 var charList = [];
 var playerChar = [];
 var enemyChar = [];
+var state = 0;
+var deadEnemy = 0;
 
 //Starts game resetting all values, attributes, positons, etc
 initializeGame();
 
 //PlayerSelect Listener
     $("div.character").on("click", function () {
-        //Check if a Player is already selected, if not run code
 
-        var isPlayer = checkForPlayer();
+        //Check if a Player is already selected, if not run code
+        var isPlayer = checkForProperty("isEnemy", false);
         if (isPlayer != true) {
 
-            //Listen for a click, set isPlayer to true
+            //Listen for a click, set isEnemy to false
             var playerSelection = $(this).attr("value");
             playerChar = searchChar(playerSelection, charList);
             changeValue(playerChar.name, "isEnemy", false);
@@ -33,59 +35,118 @@ initializeGame();
                 if (charList[i].isEnemy == true) {
                     var enemyId = document.getElementById(charList[i].name);
                     $(enemyId).detach().appendTo("#enemies");
+                    $(findStatsDiv(charList[i].name)).detach().appendTo("#enemies");
                     $(enemyId).addClass( "enemy" );
                 }
             }
             //enemySelect()
             enemySelect();
         }
-        else {
-
-        }
     });
 
-//EnemySelect()
-function enemySelect(){
-    //Please Select An Enemy
-    $("#instructions").text("Please Select an Enemy!");
-    //Listen for Click, set isFight to true, cannot select Dead Enemy
-    $("div.enemy").on("click", function () {
-        //Listen for a click, set isFight to true
-        var enemySelection = $(this).attr("value");
-        enemyChar = searchChar(enemySelection, charList);
-        changeValue(enemyChar.name, "isFight", true);
+    //EnemySelect()
+    function enemySelect() {
+        //Please Select An Enemy
+        $("#fight").hide();
+        $("#instructions").text("Please Select an Enemy!");
+            //Listen for Click, set isFight to true, cannot select Dead Enemy, only runs
+            //if there is no one currently fighting
+            $("div.enemy").on("click", function() {
+                if(checkForProperty("isFight",true) != true){
+                    //Listen for a click, set isFight to true
+                    var enemySelection = $(this).attr("value");
+                    enemyChar = searchChar(enemySelection, charList);
+                    if (enemyChar.isDead === false) {
+                        changeValue(enemyChar.name, "isFight", true);
 
-        console.log(enemyChar.isFight);  
-        //Change to Fight Image
-        fightImage(enemyChar.name);
+                        console.log(enemyChar.isFight);
+                        //Change to Fight Image
+                        fightImage(enemyChar.name);
 
-        //Move to Arena
-        $(this).detach().prependTo("#enemyChar");
+                        //Move to Arena
+                        $(this).detach().prependTo("#enemyChar");
+                        $(findStatsDiv(enemyChar.name)).detach().appendTo("#enemyChar");
 
-        //Call battleHandler()
-        battleHandler();
+                        //Call battleHandler(), kept calling this more than once... was causing an error
+                        //if(state === 0){
+                           // state = 1;
+                            battleHandler(enemyChar);
+                        //}
+                    }
+                }
+                else if(checkForProperty("isFight",true) === true){
+                    alert("Someone is already fighting bro wait your turn")
+                }
+
+            });
         
-    });
-};
+        
+        };
 
 
 //battleHandler()
 function battleHandler(){
-
+    //Shows fight button and sets text to Duel
     $("#fight").show();
     $("#instructions").text("Time to D-D-D-DUEL!");
     $("#fight").text("Attack");
 
     $("#fight").on("click", function () {
-        //player attack
+        //Deal player attack to enemy hp
+        enemyChar.hp = enemyChar.hp - playerChar.atk;
 
-        //counter attack
+        //Increase player attack by base attack
+        playerChar.atk = playerChar.atk + playerChar.atkBase;
+        console.log(playerChar.atk);
+        
+        //Print changes to screen, also had to swap font family back? I'm guessing text resets the css?
+        $(findStatsDiv(playerChar.name)).text("HP: " + playerChar.hp + " Atk: " + playerChar.atk);
+        $(findStatsDiv(playerChar.name)).css("font-family", 'Determination Sans');
+        $(findStatsDiv(enemyChar.name)).text("HP: " + enemyChar.hp + " Atk: " + enemyChar.atk);
+        $(findStatsDiv(enemyChar.name)).css("font-family", 'Determination Sans');
+
+        //Determine if Enemy is dead
+        if(enemyChar.hp <= 0){
+            //Change the enemy to dead, remove them from fighting
+            enemyChar.isDead = true;
+            console.log(enemyChar.isDead);
+            enemyChar.isFight = false;
+            console.log(enemyChar.isFight);
+            $(findCharDiv(enemyChar.name)).detach().appendTo("#defeated");
+            $(findStatsDiv(enemyChar.name)).detach().appendTo("#defeated");
+            $(findStatsDiv(enemyChar.name)).text("Defeated");
+            $(findStatsDiv(enemyChar.name)).css("font-family", 'Determination Sans');
+            deadEnemy++;
+            if(deadEnemy === 3){
+                gameOver("win");
+            }
+            else{
+                enemySelect();
+            }
+        }
+        //Enemy isn't dead, counter attack
+        else{
+            //Deal enemy Counter Atk Dmg to Player HP
+            playerChar.hp = playerChar.hp - enemyChar.ctnAtk;
+            $(findStatsDiv(playerChar.name)).text("HP: " + playerChar.hp + " Atk: " + playerChar.atk);
+            $(findStatsDiv(playerChar.name)).css("font-family", 'Determination Sans');
+
+            //Determine if Player is dead
+            if(playerChar.hp <= 0){
+                gameOver("lose");
+            }
+        }
     });
-
 };
-    //Display Attack Btn
-    //Listen for Attack Btn Click
-    //Attack()
+
+function gameOver(condition){
+    if(condition === "win"){
+        alert("You win!");
+    }
+    if(condition === "lose"){
+        alert("You lose!");
+    }
+}
 
 //Attack()
     //Player Atk Dmg HP Enemy
@@ -147,6 +208,7 @@ function battleHandler(){
         }
     }
 
+    //Find the Stats Div for each selected Character
     function findStatsDiv(name){
         switch(name){
             case "luke" : 
@@ -161,26 +223,47 @@ function battleHandler(){
         }
     }
 
-    //Check if there is a Player Character
-    function checkForPlayer(){
+    //Find the Stats Div for each selected Character
+    function findCharDiv(name){
+        switch(name){
+            case "luke" : 
+                var test = document.getElementById("luke");
+                return test;
+            case "vader" : 
+                return document.getElementById("vader");
+            case "han" : 
+                return document.getElementById("han");
+            case "obiWan" : 
+                return document.getElementById("obiWan");
+        }
+    }
+
+    //checkForProperty(property to check for, value to evaulate)
+    function checkForProperty(prop, value){
         for (var i = 0; i < charList.length; i++) {
-            if (charList[i].isEnemy == false) {
+            var object = charList[i];
+            if (object[prop] == value) {
                 return true;
             }
         }
-    };
-
+        
+    }
 
     //Sets Game to Initial State
     function initializeGame() {
+        //Reset Variables
+        playerChar = [];
+        enemyChar = [];
+        state = 0;
+        deadEnemy = 0;
         //Hide Attack Button
         $("#fight").hide();
         //Reset all characters
         charList = [
             vader = {
                 name: "vader",
-                hp: 100,
-                hpMax: 100,
+                hp: 110,
+                hpMax: 110,
                 atk: 7,
                 atkBase: 7,
                 ctnAtk: 10,
@@ -189,8 +272,8 @@ function battleHandler(){
             },
             han = {
                 name: "han",
-                hp: 120,
-                hpMax: 120,
+                hp: 130,
+                hpMax: 130,
                 atk: 5,
                 atkBase: 5,
                 ctnAtk: 10,
@@ -199,8 +282,8 @@ function battleHandler(){
             },
             obiWan = {
                 name: "obiWan",
-                hp: 110,
-                hpMax: 110,
+                hp: 120,
+                hpMax: 120,
                 atk: 6,
                 atkBase: 6,
                 ctnAtk: 10,
@@ -209,8 +292,8 @@ function battleHandler(){
             },
             luke = {
                 name: "luke",
-                hp: 90,
-                hpMax: 90,
+                hp: 100,
+                hpMax: 100,
                 atk: 8,
                 atkBase: 8,
                 ctnAtk: 10,
