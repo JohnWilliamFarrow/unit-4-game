@@ -32,6 +32,14 @@ h1 {
     font-size: 200%;
     text-align: center;
 }
+
+#reset{
+    font-family: 'Determination Sans', Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 200%;
+    text-align: center;
+}
   
 #luke {
     background-image: url("../images/lukeBase.png");
